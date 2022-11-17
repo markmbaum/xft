@@ -8,6 +8,8 @@ const prodir = joinpath("..", "data", "pro")
 
 xft = read_parquet(joinpath(prodir, "arranged.parquet")) |> DataFrame
 
+##
+
 #unwanted columns
 select!(
     xft,
@@ -32,12 +34,12 @@ for col ∈ [
         :competitorId,
         :overallRank,
         :overallScore,
-        :workout,
+        :workoutNumber,
         :rank,
         :score,
         :competitionId,
         :year,
-        :division
+        :divisionNumber
     ]
     xft[!,col] = map(xft[!,col]) do x
         if ismissing(x)
