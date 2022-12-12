@@ -1,5 +1,4 @@
 using URIs, HTTP, JSON
-using Base.Threads: @threads
 
 ## ----------------------------------------------------------------------------
 
@@ -43,7 +42,6 @@ function getpage(comp::String, year::Int, query::Dict=Dict())::Dict
     pageuri(comp, year, query) |> getjson
 end
 
-
 function saveboards(
         comp::String,
         years::AbstractVector{Int},
@@ -52,7 +50,7 @@ function saveboards(
         maxpage=Inf
     )::Nothing
     
-    @threads for year ∈ years
+    for year ∈ years
         println("starting $comp $year")
         #download and save all the controls
         savejson(
@@ -69,13 +67,16 @@ function saveboards(
             done = false
             while !done & (page <= maxpage)
                 query["page"] = page
+                sleep(rand() + 0.1) #seems to prevent rate-limiting
                 data = getpage(comp, year, query)
                 if haskey(data, "leaderboardRows") && (length(data["leaderboardRows"]) > 0)
-                    fn = joinpath(
-                        rawdir,
-                        "$(comp)_$(year)_division_$(division)_page_$(page).json"
+                    savejson(
+                        joinpath(
+                            rawdir,
+                            "$(comp)_$(year)_division_$(division)_page_$(page).json"
+                        ),
+                        data
                     )
-                    savejson(fn, data)
                 else
                     done = true
                 end

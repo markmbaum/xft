@@ -1,4 +1,4 @@
-using Parquet, DataFrames
+using Parquet, DataFrames, StatsBase
 
 ##
 
@@ -19,7 +19,7 @@ select!(
         :inSubCat,
         :fittestIn,
         :divisionId,
-        :valid,
+        :workoutValid,
         :firstName,
         :lastName
     ])
@@ -35,8 +35,8 @@ for col ∈ [
         :overallRank,
         :overallScore,
         :workoutNumber,
-        :rank,
-        :score,
+        :workoutRank,
+        :workoutScore,
         :competitionId,
         :year,
         :divisionNumber
@@ -115,6 +115,20 @@ xft[!,:weight] = map(xft.weight) do w
         w
     end
 end
+
+## try to fill missing height cells
+
+name2height = combine(
+    groupby(xft, :competitorName),
+    :height => (h -> mean(skipmissing(h))) => :height
+)
+
+name2height = Dict(zip(
+    name2height.competitorName,
+    replace(name2height.height, NaN => missing)
+))
+
+xft[!,:height] = map(name -> name2height[name], xft.competitorName)
 
 ##
 

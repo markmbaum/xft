@@ -1,4 +1,5 @@
 using JSON, DataFrames, Parquet
+using Base.Threads: @threads
 
 ##
 
@@ -25,7 +26,7 @@ function arrangerow(row::Dict)::DataFrame
     df = repeat(p |> DataFrame, L)
     df[!,"workoutNumber"] = 1:L
     for c ∈ ("rank", "score", "valid")
-        df[!,c] = map(s -> s[c], row["scores"])
+        df[!,"workout"*uppercasefirst(c)] = map(s -> s[c], row["scores"])
     end
     return df
 end
@@ -57,18 +58,23 @@ end
 
 ## read, arrange, and concatenate all the leaderboard information
 
-xft = vcat(
-    map(
-        arrangepage,
-        filter!(
-            fn -> !occursin("controls", fn),
-            readdir(
-                rawdir,
-                join=true
-            )
-        )
-    )...
+fns = readdir(rawdir, join=true)
+fns = filter!(fn -> !occursin("controls", fn), fns)
+
+xft = reduce(vcat, map(arrangepage, fns))
+
+##
+
+df = combine(
+    groupby(
+        xft,
+        [:year, :competitionType, :divisionNumber]
+    ),
+    nrow
 )
+filter!(r -> r.competitionType == "open", df)
+filter!(r -> parse(Int, r.divisionNumber) < 3, df)
+println(df)
 
 ## include workout and division names from control files
 
