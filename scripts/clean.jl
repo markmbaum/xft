@@ -80,6 +80,16 @@ xft[!,:weight] = map(xft.weight) do w
     end
 end
 
+xft[!,:age] = map(xft.age) do a
+    if a |> iszero
+        missing
+    elseif a > 100
+        missing
+    else
+        a
+    end
+end
+
 for col ∈ [:status, :competitorName]
     xft[!,col] = map(xft[!,col]) do x
         if ismissing(x) || isempty(x)
@@ -129,6 +139,12 @@ name2height = Dict(zip(
 ))
 
 xft[!,:height] = map(name -> name2height[name], xft.competitorName)
+
+## new column for competition and division (Games—Women, Open—Men, etc...)
+
+xft[!,:competitionDivision] = map(zip(xft.competitionType, xft.divisionName)) do x
+    titlecase(x[1]) * ": " * titlecase(x[2])
+end
 
 ##
 
