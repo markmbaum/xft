@@ -34,11 +34,17 @@ df = combine(
     :divisionNumber => first => :divisionNumber,
     :competitionDivision => first => :competitionDivision,
     [:workoutRank, :height] => ((r,h) -> [corr(r,h)]) => [:c_height, :p_height, :N_height],
-    [:workoutRank, :age] => ((r,a) -> [corr(r,a)]) => [:c_age, :p_age, :N_age],
+    [:workoutRank, :age]    => ((r,a) -> [corr(r,a)]) => [:c_age, :p_age, :N_age],
     nrow
 )
 
-CSV.write(joinpath(prodir, "workout_statistics.csv"), df)
+CSV.write(
+    joinpath(
+        prodir,
+        "workout_statistics.csv"
+    ),
+    df
+)
 
 ##
 
@@ -63,7 +69,7 @@ df = combine(
     :height => minimum ∘ skipmissing => :minHeight,
     :height => std ∘ skipmissing => :stdHeight,
     [:overallRank, :height] => ((r,h) -> [corr(r,h)]) => [:c_height, :p_height, :N_height],
-    [:overallRank, :age] => ((r,a) -> [corr(r,a)]) => [:c_age, :p_age, :N_age],
+    [:overallRank, :age]    => ((r,a) -> [corr(r,a)]) => [:c_age, :p_age, :N_age],
     :age => median ∘ skipmissing => :medianAge,
     :age => mean ∘ skipmissing => :meanAge,
     :age => maximum ∘ skipmissing => :maxAge,
@@ -72,6 +78,12 @@ df = combine(
     nrow
 )
 
-CSV.write(joinpath(prodir, "competition_statistics.csv"), df)
+CSV.write(
+    joinpath(
+        prodir,
+        "competition_statistics.csv"
+    ),
+    df
+)
 
 ##
