@@ -10,16 +10,21 @@ xft = read_parquet(joinpath(prodir, "cleaned.parquet")) |> DataFrame
 
 ##
 
-function corr(x, y)
+function corr(x, y, nmax=Inf)
     #compute correlation on rank indices, excluding missing values
-    b = (!ismissing).(x) .& (!ismissing).(y)
-    rx = x[b] |> tiedrank
-    ry = y[b] |> tiedrank
-    t = CorrelationTest(rx, ry)
+    b = (x .|> !ismissing) .& (y .|> !ismissing)
+    N = sum(b)
+    x = x[b]
+    y = y[b]    
+    if N > nmax
+        x = x[1:nmax]
+        y = y[1:nmax]
+        N = nmax
+    end
+    t = CorrelationTest(tiedrank(x), tiedrank(y))
     #correlation coefficient, p value, and number of samples
     c = t.r |> Float32
     p = pvalue(t) |> Float32
-    N = sum(b) |> Int32
     return (c, p, N)
 end
 
@@ -42,6 +47,37 @@ CSV.write(
     joinpath(
         prodir,
         "workout_statistics.csv"
+    ),
+    df
+)
+
+
+##
+
+g = groupby(
+    filter(r -> (r.competitionType == "open") & (r.divisionNumber < 3), xft), 
+    [:year, :divisionName, :workoutName]
+)
+
+df = combine(g, :height => (h -> h .|> !ismissing |> sum) => :nheight)
+
+nmax = 25:25:maximum(df.nheight)
+
+for i ∈ eachindex(nmax)
+    c = combine(g, [:workoutRank, :height] => ((r,h) -> [corr(r,h,nmax[i])]) => [:c_height, :p_height, :N_height])
+    b = c[!,:N_height] .< nmax[i] 
+    for col ∈ [:c_height, :p_height, :N_height]
+        s = string(col)*'_'*string(nmax[i])
+        v = c[!,col] |> allowmissing
+        v[b] .= missing
+        df[!,s] = v
+    end
+end
+
+CSV.write(
+    joinpath(
+        prodir,
+        "workout_height_correlation_CV.csv"
     ),
     df
 )
