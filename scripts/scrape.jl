@@ -1,3 +1,4 @@
+using ProgressMeter
 using URIs, HTTP, JSON
 
 ## ----------------------------------------------------------------------------
@@ -15,7 +16,6 @@ function savejson(fn::String, json::Dict, indent::Int=2)::Nothing
     nothing
 end
 
-
 function controlsuri(comp::String, year::Int)::URI
     URI(
         scheme="https",
@@ -27,7 +27,6 @@ end
 function getcontrols(comp::String, year::Int)::Dict
     controlsuri(comp, year) |> getjson
 end
-
 
 function pageuri(comp::String, year::Int, query::Dict=Dict())::URI
     URI(
@@ -62,12 +61,14 @@ function saveboards(
         )
         #download and save all leaderboard information
         for division ∈ divisions
+            println("starting division $division")
             query["division"] = division
             page = 1
             done = false
+            prog = ProgressUnknown("pages downloaded:")
             while !done & (page <= maxpage)
                 query["page"] = page
-                sleep(rand() + 0.1) #seems to prevent rate-limiting
+                sleep(rand() + 0.2) #seems to prevent rate-limiting
                 data = getpage(comp, year, query)
                 if haskey(data, "leaderboardRows") && (length(data["leaderboardRows"]) > 0)
                     savejson(
@@ -80,8 +81,10 @@ function saveboards(
                 else
                     done = true
                 end
+                ProgressMeter.next!(prog)
                 page += 1
             end
+            ProgressMeter.finish!(prog)
         end
         println("finished $comp $year")
     end
@@ -90,6 +93,7 @@ end
 
 ## ----------------------------------------------------------------------------
 
+#this clears and remakes the raw data directory
 if isdir(rawdir)
     rm(rawdir, recursive=true)
 end
@@ -99,8 +103,8 @@ mkpath(rawdir)
 
 saveboards(
     "games",
-    2007:2022,
-    [1:10; 12:39] #skip the teams division (number 11)
+    2007:2023,
+    [1,2] #[1:10; 12:39] #skip the teams division (number 11)
 )
 
 ##
@@ -108,8 +112,8 @@ saveboards(
 saveboards(
     "open",
     2011:2022,
-    [1:10; 12:39], #skip the teams division (number 11)
-    maxpage=50
+    [1,2], #[1:10; 12:39], #skip the teams division (number 11)
+    maxpage=100
 )
 
 ##
