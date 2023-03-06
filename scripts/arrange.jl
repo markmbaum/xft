@@ -85,7 +85,7 @@ controls = Dict(
 for year ∈ 2007:2022
     controls["games"][year] = getdivisioncontrols("games", year)
 end
-for year ∈ 2011:2022
+for year ∈ 2011:2023
     controls["open"][year] = getdivisioncontrols("open", year)
 end
 

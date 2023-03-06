@@ -50,7 +50,6 @@ function saveboards(
     )::Nothing
     
     for year ∈ years
-        println("starting $comp $year")
         #download and save all the controls
         savejson(
             joinpath(rawdir, "$(comp)_$(year)_controls.json"),
@@ -61,7 +60,7 @@ function saveboards(
         )
         #download and save all leaderboard information
         for division ∈ divisions
-            println("starting division $division")
+            println("starting year $year division $division")
             query["division"] = division
             page = 1
             done = false
@@ -103,7 +102,7 @@ mkpath(rawdir)
 
 saveboards(
     "games",
-    2007:2023,
+    2007:2022,
     [1,2] #[1:10; 12:39] #skip the teams division (number 11)
 )
 
@@ -111,7 +110,7 @@ saveboards(
 
 saveboards(
     "open",
-    2011:2022,
+    2011:2023,
     [1,2], #[1:10; 12:39], #skip the teams division (number 11)
     maxpage=100
 )
