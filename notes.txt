@@ -1,0 +1,21 @@
+Process:
+
+
+
+-------------------------------------------------------------------------------
+Plan
+
+datset description
+    what is the xfit games
+    what are the observations
+    how reliable is the data
+
+how does the distribution of height and weight in the elite stratum change over time
+
+what is the probability of ranking highly for different workouts, for different heights
+
+can the workout description be used to predict the height-ranking relationship
+
+is there a significant difference between repeated workouts at different times (improvement)?
+
+what about a ratings based system like ELO? https://discourse.mc-stan.org/t/modelling-the-winner-of-board-games/18776/6
