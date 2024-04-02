@@ -3,7 +3,6 @@ env/
 data/
 arch/
 notebooks/*.html
-site/
 plots/
 model-results/
 .DS_Store
@@ -147,9 +146,6 @@ venv.bak/
 
 # Rope project settings
 .ropeproject
-
-# mkdocs documentation
-/site
 
 # mypy
 .mypy_cache/
