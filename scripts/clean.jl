@@ -1,12 +1,46 @@
-using Parquet, DataFrames, StatsBase
+"""
+This script takes the raw tabulated data at:
+    data/raw/athletes.parquet
+and cleans it up into a slimmer table with only relevant columns and fewer unit problems, writing the cleaned version to:
+    data/pro/athletes.parquet
+"""
+
+using DrWatson
+@quickactivate "XFT"
+using Parquet, CSV, DataFrames, StatsBase
 
 ##
 
-const prodir = joinpath("..", "data", "pro")
+const rawdir = datadir("raw")
+
+const prodir = datadir("processed")
+
+const cleandir = datadir("clean")
 
 ##
 
-xft = read_parquet(joinpath(prodir, "arranged.parquet")) |> DataFrame
+function fillbyname!(df::DataFrame, col::Symbol)::Nothing
+    X = combine(
+        groupby(df, :competitorName),
+        col => (h -> mean(skipmissing(h))) => col
+    )
+    mapper = Dict(zip(
+        X.competitorName,
+        replace(X[!,col], NaN => missing)
+    ))
+    df[!,col] = map(name -> mapper[name], xft.competitorName)
+    nothing
+end
+
+## read the first stage of athlete data
+
+xft = read_parquet(joinpath(prodir, "competition_results.parquet")) |> DataFrame
+
+##
+
+divisions = CSV.File(joinpath(rawdir, "divisions.csv")) |> DataFrame
+
+divisions = Dict(zip(divisions.divisionNumber, divisions.divisionName))
 
 ##
 
@@ -19,9 +53,8 @@ select!(
         :inSubCat,
         :fittestIn,
         :divisionId,
-        :workoutValid,
         :firstName,
-        :lastName
+        :lastName,
     ])
 )
 for prefix ∈ ["affiliate", "country", "region"]
@@ -56,12 +89,26 @@ for col ∈ [
     end
 end
 
+## division labels
+
+xft[!,:divisionName] = map(n -> String(divisions[n]), xft.divisionNumber)
+
+##
+
+#age group or individual flag
+xft[!,:individual] = map(d -> d <= 2 ? true : false, xft.divisionNumber)
+
+#unwanted divisions (have to exclude adaptive athletes)
+filter!(:divisionNumber => x -> x ∉ 20:35, xft)
+
 xft[!,:gender] = map(x -> first(x) == 'M' ? true : false, xft.gender)
 
+#exclude the scaled divisions
 xft[!,:scaled] = parse.(Bool, xft.scaled)
+filter!(:scaled => s -> !(s), xft)
 
 xft[!,:height] = map(xft.height) do h
-    if ismissing(h) || isempty(h)
+    if ismissing(h) | isempty(h)
         missing
     elseif occursin("cm", h)
         parse(Float32, filter(isnumeric, h)) / 1f2
@@ -81,9 +128,9 @@ xft[!,:weight] = map(xft.weight) do w
 end
 
 xft[!,:age] = map(xft.age) do a
-    if a |> iszero
+    if ismissing(a) || isempty(a)
         missing
-    elseif a > 100
+    elseif (a == 0)
         missing
     else
         a
@@ -102,58 +149,52 @@ end
 
 ##
 
-xft[!,:height] = map(xft.height) do h
-    if ismissing(h)
+xft[!,:age] = map(xft.age) do a
+    if ismissing(a) || (a < 14) | (a > 100) #there are no divisions for under 14 year olds
         missing
-    elseif 1 < h < 2.5
-        h
-    elseif h > 12.5
-        h / 1f1
-    elseif 3 <= h <= 6
-        h * 3.93f1/1f2
-    elseif 0.5 < h < 1
-        h * 1f2/3.93f1
     else
-        missing
+        a
     end
 end
 
+#probably data entry errors, physically quite implausible
+xft[!,:height] = map(xft.height) do h
+    if ismissing(h) || (h < 1.2) | (h > 2.13)
+        missing
+    else
+        h
+    end
+end
+
+#probably data entry errors, physically quite implausible
 xft[!,:weight] = map(xft.weight) do w
-    if ismissing(w) || ((w > 300) | (w ≈ 0.454) | (w ≈ 1))
+    if ismissing(w) || (w < 35) | (w > 150)
         missing
     else
         w
     end
 end
 
-## try to fill missing height cells
-
-name2height = combine(
-    groupby(xft, :competitorName),
-    :height => (h -> mean(skipmissing(h))) => :height
-)
-
-name2height = Dict(zip(
-    name2height.competitorName,
-    replace(name2height.height, NaN => missing)
-))
-
-xft[!,:height] = map(name -> name2height[name], xft.competitorName)
-
-## new column for competition and division (Games—Women, Open—Men, etc...)
-
-xft[!,:competitionDivision] = map(zip(xft.competitionType, xft.divisionName)) do x
-    titlecase(x[1]) * ": " * titlecase(x[2])
+xft[!,:workoutValid] = map(xft.workoutValid) do v
+    if ismissing(v) | isempty(v)
+        missing
+    else
+        parse(Bool, v)
+    end
 end
+
+## try to fill missing height and weight cells by averaging over existing participant values
+
+fillbyname!(xft, :height)
+fillbyname!(xft, :weight)
 
 ##
 
-write_parquet(
-    joinpath(
-        prodir,
-        "cleaned.parquet"
-    ),
-    xft
-)
+#workout 8 in the 2020 is just a tabulation after stage 1, not a real workout
+filter!(r -> (r.year != 2020) | (r.workoutNumber != 8), xft)
+
+##
+
+write_parquet(joinpath(cleandir, "competition_results.parquet"), xft)
 
 ##
