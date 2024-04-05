@@ -1,13 +1,6 @@
 body {
     font-family: sans-serif;
     line-height: 1.25;
-}
-
-h1 {
-    text-align: center;
-}
-
-h2 {
     text-align: center;
 }
 
@@ -17,25 +10,10 @@ p {
     text-align: justify;
 }
 
-ol {
+ol, ul {
     margin: auto;
     max-width: 16cm;
     text-align: justify;
-}
-
-ul {
-    margin: auto;
-    max-width: 16cm;
-    text-align: justify;
-}
-
-li {
-    margin: 0.3cm 0;
-}
-
-pre {
-    max-width: 16cm;
-    margin: 0.1cm auto;
 }
 
 img {
@@ -52,8 +30,17 @@ img {
     text-align: justify;
 }
 
+li {
+    margin: 0.3cm 0;
+}
+
 .fig-bokeh {
     display: grid;
     place-items: center;
     margin: 1cm 0;
+}
+
+pre {
+    max-width: 16cm;
+    margin: 0.1cm auto;
 }
