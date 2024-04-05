@@ -13,10 +13,22 @@
 
   <h1>Analyzing Elite Competitive Fitness Data</h1>
 
+  <p style="text-align: center; font-size: 85%;">
+    All of the code and files for this little project are here:<br><a href="https://github.com/markmbaum/xft" target="_blank">https://github.com/markmbaum/xft</a>
+  </p>
+
+  <p style="text-align: center; font-size: 85%;">
+    This source for this website, for example, is here:<br><a href="https://github.com/markmbaum/xft/tree/main/site" target="_blank">https://github.com/markmbaum/xft/tree/main/site</a>
+  </p>
+
   <h2>Summary</h2>
 
+  <p>
+    This page briefly explains some analyses I did with the results/data from fitness competitions&mdash;elite CrossFit. I look for patterns and clusters in the workout descriptions across all Open and Games workouts; use hierarchical regression models to see if height, weight, and age have effects on athlete rankings; then see if it might be possible to <i>predict</i> the average effects of height, weight, and age on athlete performance just from the written description of Open workouts. Lots of other things could be done with the data and I mention some at the bottom. Here is a summary of the findings:
+  </p>
+
   <ul>
-    <li>Embeddings of workout descriptions from the CrossFit Games and Open are interesting to explore.</li>
+    <li>Embeddings of workout descriptions from the CrossFit Games and Open have some interesting structure.</li>
     <li>As expected, the written descriptions of Open workouts are generally more similar to each other than to any Games workouts.</li>
     <li>Workouts at the end of each Games competition are more average and workouts at the beginning are more unusual.</li>
     <li>In the first few years of the Open, taller and lighter athletes did well. Then, after about 2015, shorter and heavier athletes were consistently more successful. Younger athletes always do better in the Open, even within different divisions.</li>
@@ -24,7 +36,7 @@
     <li>It's probably possible to predict the effects of height, weight, and age just from the <i>written</i> description of an Open workout, but we would need more data.</li>
   </ul>
 
-  <h2>Introduction</h2>
+  <h2>Background</h2>
 
   <p>
     Every year, the central <a href="https://www.crossfit.com/" target="_blank">CrossFit</a> organization runs a global
@@ -211,7 +223,7 @@
   </p>
 
   <p>
-    Instead of a GP, <a href="https://github.com/markmbaum/xft/blob/main/analysis/rank_modeling_neural.ipynb" target="_blank">I trained a small neural network</a> using PyTorch. I only used workouts from the Open because the effects of height, weight, and age are generally too uncertain for Games workouts. Essentially, the labels are not well-known for Games workouts. There are only 67 Open workouts on record, however, so the training is extremely data-limited and this whole effort is a bit silly. The results are not likely to be great, but I wanted to see them.
+    Instead of a GP, <a href="https://github.com/markmbaum/xft/blob/main/analysis/rank_modeling_neural.ipynb" target="_blank">I trained a small neural network</a> using PyTorch. I only used workouts from the Open because the effects of height, weight, and age are generally too uncertain for Games workouts&mdash;the labels themselves are not well-known. There are only 67 Open workouts on record, however, so the training is extremely data-limited and this whole effort is arguably silly. The results are not likely to be great, but I wanted to see them.
   </p>
 
   <p>
@@ -219,7 +231,7 @@
   </p>
 
   <p>
-    I use k-fold cross-validation to see which model configurations might work best. The folds are individual years, or multiple years, of Open workouts. For instance, the plot below shows training loss and validation loss when the validation set includes all Open workouts in 2023 and 2024. Again, the number of examples is extremely limited, so we expect some unusual behavior (lower validation loss than training loss). The plot below also shows the "mean effect differences," which is how different the model's predicted regression coefficients are from the coefficients we get by doing the regression directly using OLS, for each workout. Although the loss function is applied to the actual rankings, not the regression coefficients, this is the more meaningful metric.
+    I use k-fold cross-validation to see which model configurations might work best. The folds are individual years, or multiple years, of Open workouts. For instance, the plot below shows training loss and validation loss when the validation set includes all Open workouts in 2023 and 2024. Again, the number of examples is extremely limited, so we expect some unusual behavior (lower validation loss than training loss). The plot below also shows the "mean effect differences," which is how different the model's predicted regression coefficients are from the coefficients we get by doing the regression directly using ordinary least squares (OLS) for each workout. Although the loss function is applied to the actual rankings, not the regression coefficients, this is the more meaningful metric.
   </p>
 
   <img src="assets/training.png"></img>
@@ -242,6 +254,22 @@
   <p>
     In any case, we need more data to do this well, but it was interesting to look.
   </p>
+
+  <h2>Other Potential Analyses</h2>
+
+  <p>Some other things I would do, if I spent more time on this:</p>
+
+  <ul>
+    <li>
+      Compute rankings for individual athletes over the course of their careers, based on Games performance and Open performance separately. There are lots of ranking systems out there, but it would have to be a multi-player ranking system.
+    </li>
+    <li>
+      Find a better way to deal with the number if athletes in the Open. Above, I simply remove all athlete results if their overall competition ranking is less than 500. Surely something better is possible.
+    </li>
+    <li>
+      Find a better way to directly model the rankings. I used the inverse normal transformation of the rankings for the regressions above, which is very convenient, but the regression effects are hard to interpret.
+    </li>
+  </ul>
 
   <script src="assets/tsne_workouts.js"></script>
   <script src="assets/competition_cluster_counts.js"></script>
