@@ -192,25 +192,39 @@
   </p>
 
   <p>
-    I <a href="https://github.com/markmbaum/xft/blob/main/analysis/batch_rank_modeling.py" target="_blank">did just that</a>, for the <i>overall</i> rankings in each year of the Open, and found some interesting results. The plot below is a <a href="https://en.wikipedia.org/wiki/Forest_plot" target="_blank">forest plot</a> showing the results of correlated effects models for each year of the open. The colored intervals summarize the marginal posterior distributions for the <i>mean effects</i> across all divisions of each year's rankings. The thinner lines show the 94 % highest density interval (HDI) of the posteriors, the thicker line shows the 50 % interval, and the central dot shows the posterior mean.
+    I <a href="https://github.com/markmbaum/xft/blob/main/analysis/batch_rank_modeling.py" target="_blank">did just that</a>, for the <i>overall</i> rankings in each year of the Open, and found some interesting results. The plot below is a <a href="https://en.wikipedia.org/wiki/Forest_plot" target="_blank">forest plot</a> showing the results of correlated effects models for each year of the open. The regression models are fit to <i>all divisions</i> in each year, but I only show the main Men and Women's divisions. The colored intervals summarize the marginal posterior distributions for the linear effects across all divisions of each year's rankings. The thinner lines show the 94 % highest density interval (HDI) of the posteriors, the thicker line shows the 50 % interval, and the central dot shows the posterior mean.
   </p>
 
   <p>
-    In the first year of the Open (2011), height was not strongly associated with athlete's overall rankings in the Open. Weight was, with lighter athletes performing better, on average. There was no preference for older or younger athletes. However, over the years, taller athletes were disadvantaged, heavier athletes were advantaged, and older athletes were consistently disadvantaged. For the fittest people in the top 500 finishers, being shorter and heavier (stronger) became a significant advantage starting in about 2016. This fits with most people's assumptions about who succeeds in the Open. It generally includes workouts with pull-ups, thrusters, burpees, snatches, cleans, deadlifts, etc... things that shorter/stockier people are usually better at. This isn't always true (see 19.1 for example) but on average we have clear evidence that overall success at the open advantages shorter, heavier, and younger competitors (on average).
+    There is in interesting pattern in these regression coefficients over the years of the Open. In the first year of the Open (2011) height was an advantage, but over the next several years it wasn't. In those first few years, it was also helpful to be slightly lighter. However, over time, taller athletes were disadvantaged and heavier athletes were advantaged. Older athletes were consistently disadvantaged. For the fittest people in the top 500 finishers, being shorter and heavier (stronger) became a significant advantage starting in 2015/2016. This fits with most people's assumptions about who succeeds in the Open. It generally includes workouts with pull-ups, thrusters, burpees, snatches, cleans, deadlifts, etc... things that shorter/stockier people are usually better at. This isn't always true (see 19.1 for example) but on average we have clear evidence that overall success at the open advantages shorter, heavier, and younger competitors (on average).
   </p>
 
-  <img src="assets/batch_open.png"></img>
+  <img src="assets/batch_open_main_divisions.png"></img>
   <div class="caption">The results of correlated effects modeling for each year of the Open, showing the effects of height, weight, and age on the <i>overall</i> ranking for each year.</div>
 
   <p>
     I also ran the same correlated effects models for each year of the Games and the results are shown below. There are only two divisions in each Games competition that are doing the marquee workouts and each competition has only tens of competitors. Consequently, the mean effects are quite uncertain across only two divisions. However, there are still some important observations to make. The effects of height and weight are sometimes positive and sometimes negative. If you're a tall, short, heavy, or light athlete, some years favor you and others disadvantage you. Generally, however, being older has a negative impact on overall ranking at the Games.
   </p>
+
   <p>
-    There are some outlier years. For example, in 2019 the shorter, heavier men performed significantly better than their counterparts. Interestingly, there were cuts after workout 5 in the 2019 Games, which was the "Mary" workout (pistols, handstand pushups, and pull-ups). That may have tilted the final rankings toward shorter, stronger athletes by cutting the bigger guys. It's notable that the same effects are not observed for the Women in 2019.
+    There are some outlier years in the Games regressions below. For example, in 2019 the shorter, heavier men performed significantly better than their counterparts. Interestingly, there were cuts after workout 5 in the 2019 Games, which was the "Mary" workout (pistols, handstand pushups, and pull-ups). Maybe that workout tilted the final rankings toward shorter, stronger athletes by cutting the bigger guys, but it's notable that the same effects are not observed for the Women in 2019. Another noticeable year was 2021, when taller, lighter women and men were both significantly advantaged, with very large effects around 0.5 for the height feature.
   </p>
 
-  <img src="assets/batch_games.png"></img>
+
+  <img src="assets/batch_games_main_divisions.png"></img>
   <div class="caption">The results of correlated effects modeling for each year of the Games. There are not as many athletes in the Games and there are fewer divisions doing the marquee workouts, so the results are much more uncertain.</div>
+
+  <p>
+    The regression coefficients in all the models above are fit to inverse normal transformations of rankings and each of the features are standardized. So, a coefficient of 0.1 for the weight feature indicates that, on average, being 1 standard deviation heavier on the weight scale increases an athlete's ranking by 0.1 standard deviations on the transformed scale, <i>after accounting for height and age</i>. This is approximately the case for the lots of the Open years, where the weight coefficients are 0.1 or higher.
+  </p>
+
+  <p>
+    There is one important caveat: the data for people's height, weight, and age are not perfectly reliable. Competitors may not record their true height. They may also record their weight at one point in their career without updating it over time if their weight changes. For example, a reasonable assumption is that the shortest athletes in the Men's division record inflated values for their height. These issues are worth remembering because they could bias some of the regression modeling below. However, they don't invalidate the results. It's perfectly fine to have some error in measured features, even though it can reduce statistical precision, so I'm not worried about random errors in athlete weights, for example. There are clear effects in the Open regressions. The data are not just pure noise.
+  </p>
+
+  <p>
+    The issue is potential bias. The scales for height and weight could be slightly off, making the regression coefficients slightly wrong, but this is unlikely to be a major problem. Even if short athletes record slightly inflated heights, they're not recording random heights or inverse heights or something crazy like that. If athletes record 5'7" when they're actually 5'5", that's fine. The regression coefficient for height will be a little off, but the direction will be right. If we measured athlete heights perfectly and tried to use these regression models to predict performance, we might be systematically wrong by some factor, but we're not doing that. We just want to know if there are associations between height, weight, age, and performance, and roughly how strong they are.
+  </p>
 
   <h2>Predicting Effects of Height, Weight, and Age in the Open</h2>
 
