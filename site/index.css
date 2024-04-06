@@ -38,9 +38,11 @@ li {
     display: grid;
     place-items: center;
     margin: 1cm 0;
+    text-align: left;
 }
 
 pre {
     max-width: 16cm;
     margin: 0.1cm auto;
+    text-align: left;
 }
