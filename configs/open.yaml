@@ -1,0 +1,20 @@
+output_directory: gs://xft-storage
+competition: open
+max_page: 10_000
+force: false
+ignore_failures: true
+years:
+  - 2011
+  - 2012
+  - 2013
+  - 2014
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+  - 2021
+  - 2022
+  - 2023
+  - 2024
