@@ -1,1 +1,3 @@
 site/* linguist-generated=true
+*.html linguist-generated
+*.ipynb linguist-generated
