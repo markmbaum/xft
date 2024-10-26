@@ -1,0 +1,12 @@
+1 wall walk
+10 double-unders
+3 wall walks
+30 double-unders
+6 wall walks
+60 double-unders
+9 wall walks
+90 double-unders
+15 wall walks
+150 double-unders
+21 wall walks
+210 double-unders

@@ -1,0 +1,3 @@
+Swim 500 m
+Paddle 1,000 m
+Run 2,000 m

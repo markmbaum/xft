@@ -1,12 +1,18 @@
 # Miscellaneous
 env/
-data/
+data/raw
+data/clean
+data/processed
 arch/
 notebooks/*.html
 plots/
 model-results/
 .DS_Store
 .ruff_cache
+.vscode
+working.py
+*.ipynb
+*.csv
 
 #------------------------------------------------------------------------------
 
